@@ -1,12 +1,21 @@
 import React from 'react';
-// import carsFromServer from './api/cars';
-// import colorsFromServer from './api/colors';
+import carsFromServer from './api/cars';
+import colorsFromServer from './api/colors';
+
+interface Car {
+  id: number,
+  brand: string,
+  rentPrice: number,
+  colorId: number
+}
 
 // 1. Render car with color
 // 2. Add ability to filter car by brand name
 // 3. Add ability to filter car by color
 
 export const App: React.FC = () => {
+  const filteredCars: Car[] = carsFromServer;
+
   return (
     <div>
       <input type="search" placeholder="Find by car brand" />
@@ -25,24 +34,20 @@ export const App: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Ferarri</td>
-            <td style={{ color: 'red' }}>Red</td>
-            <td>500</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Opel</td>
-            <td style={{ color: 'white' }}>White</td>
-            <td>300</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Audi</td>
-            <td style={{ color: 'black' }}>Black</td>
-            <td>300</td>
-          </tr>
+          {filteredCars.map(car => {
+            const { id, brand, rentPrice } = car;
+            const carColor = colorsFromServer
+              .find(color => car.colorId === color.id);
+
+            return (
+              <tr key={id}>
+                <td>{id}</td>
+                <td>{brand}</td>
+                <td>{carColor?.name}</td>
+                <td>{rentPrice}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

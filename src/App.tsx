@@ -1,18 +1,65 @@
-import React from 'react';
-// import carsFromServer from './api/cars';
-// import colorsFromServer from './api/colors';
+import React, { ChangeEvent, useState } from 'react';
+import carsFromServer from './api/cars';
+import colorsFromServer from './api/colors';
 
 // 1. Render car with color
 // 2. Add ability to filter car by brand name
 // 3. Add ability to filter car by color
 
+const cars = carsFromServer.map((car) => {
+  const getColorById = colorsFromServer
+    .find(color => (color.id === car.colorId));
+
+  return {
+    ...car,
+    getColorById,
+  };
+});
+
 export const App: React.FC = () => {
+  const [query, setQuery] = useState('');
+  const [selectedColorId, setSelectedColorId] = useState(0);
+
+  const handleChangeQuery = (event: ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value);
+  };
+
+  const visibleCars = cars.filter((car) => {
+    const carsByBrand
+      = car.brand.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+
+    const carsByColor = car.colorId === selectedColorId;
+
+    return selectedColorId
+      ? carsByBrand && carsByColor
+      : carsByBrand;
+  });
+
+  const handleChangeColorId = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedColorId(Number(event.target.value));
+  };
+
   return (
     <div>
-      <input type="search" placeholder="Find by car brand" />
+      <input
+        type="search"
+        placeholder="Find by car brand"
+        onChange={handleChangeQuery}
+      />
 
-      <select>
-        <option>Chose a color</option>
+      <select
+        value={selectedColorId}
+        onChange={handleChangeColorId}
+      >
+        <option value={0} disabled>Chose a color</option>
+        {colorsFromServer.map((color) => (
+          <option
+            key={color.id}
+            value={color.id}
+          >
+            {color.name}
+          </option>
+        ))}
       </select>
 
       <table>
@@ -25,24 +72,14 @@ export const App: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Ferarri</td>
-            <td style={{ color: 'red' }}>Red</td>
-            <td>500</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Opel</td>
-            <td style={{ color: 'white' }}>White</td>
-            <td>300</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Audi</td>
-            <td style={{ color: 'black' }}>Black</td>
-            <td>300</td>
-          </tr>
+          {visibleCars.map((car) => (
+            <tr>
+              <td>{car.id}</td>
+              <td>{car.brand}</td>
+              <td style={{ color: 'red' }}>{car.getColorById?.name}</td>
+              <td>{car.rentPrice}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
